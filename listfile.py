@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def list_files():
-    folder_path = r'C:\Users\quank\Documents\rmit\engineering science\architndesign\word_file'  # Replace with the actual folder path
+    folder_path = r'word_file'  # Replace with the actual folder path
     # Get a list of all files in the folder
     files = os.listdir(folder_path)
 
@@ -14,7 +14,7 @@ def list_files():
 
 @app.route('/delete', methods=['POST'])
 def delete_file():
-    folder_path = r'C:\Users\quank\Documents\rmit\engineering science\architndesign\word_file'  # Replace with the actual folder path
+    folder_path = r'word_file'  # Replace with the actual folder path
 
     # Get the filename from the request
     filename = request.form['filename']
@@ -30,7 +30,7 @@ def delete_file():
 
 @app.route('/fix', methods=['POST'])
 def fix_file():
-    folder_path = r'C:\Users\quank\Documents\rmit\engineering science\architndesign\word_file'  # Replace with the actual folder path
+    folder_path = r'word_file'  # Replace with the actual folder path
     # Get the filename from the request
     filename = request.form['filename']
 
@@ -95,7 +95,7 @@ def fix_file():
 
 @app.route('/download', methods=['POST'])
 def download_file():
-    folder_path = r'C:\Users\quank\Documents\rmit\engineering science\architndesign\word_file'  # Replace with the actual folder path
+    folder_path = r'\word_file'  # Replace with the actual folder path
 
     # Get the filename from the request
     filename = request.form['filename']
