@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File List</title>
+</head>
+<body>
+    <h1>Files</h1>
+    <ul>
+        {% for file in files %}
+            <li>
+                {{ file }}
+                <!-- Add a form with a delete button for each file -->
+                <form action="/delete" method="post" style="display: inline;">
+                    <input type="hidden" name="filename" value="{{ file }}">
+                    <input type="submit" value="Delete">
+                </form>
+                <!-- Add a form with a delete button for each file -->
+                <form action="/fix" method="post" style="display: inline;">
+                    <input type="hidden" name="filename" value="{{ file }}">
+                    <input type="submit" value="grammar">
+                </form>
+                <form action="/download" method="post" style="display: inline;">
+                    <input type="hidden" name="filename" value="{{ file }}">
+                    <input type="submit" value="download">
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
