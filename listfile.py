@@ -6,8 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def list_files():
-    # folder_path = r'C:\Users\quank\Documents\rmit\engineering science\architndesign\word_file'  # Replace with the actual folder path
-    folder_path = r'word_file'
+    folder_path = r'word_file'  # Replace with the actual folder path
     # Get a list of all files in the folder
     files = os.listdir(folder_path)
 
@@ -15,8 +14,7 @@ def list_files():
 
 @app.route('/delete', methods=['POST'])
 def delete_file():
-    # folder_path = r'C:\Users\quank\Documents\rmit\engineering science\architndesign\word_file'  # Replace with the actual folder path
-    folder_path = r'word_file'
+    folder_path = r'word_file'  # Replace with the actual folder path
 
     # Get the filename from the request
     filename = request.form['filename']
@@ -32,8 +30,7 @@ def delete_file():
 
 @app.route('/fix', methods=['POST'])
 def fix_file():
-    # folder_path = r'C:\Users\quank\Documents\rmit\engineering science\architndesign\word_file'  # Replace with the actual folder path
-    folder_path = r'word_file'
+    folder_path = r'word_file'  # Replace with the actual folder path
     # Get the filename from the request
     filename = request.form['filename']
 
@@ -47,86 +44,58 @@ def fix_file():
 
         # Load the Word document
         #word_replacer = WordReplacer(filedir2)
-    # Load the Word document
     word_replacer = WordReplacer(file_path)
-    
-    underline_finder = WordUnderlineFinder()
-    underlined_text_array = underline_finder.collect_underlined_text(word_replacer.docx)
-
-    # Extract all paragraphs from the document
-    paragraphs = []
-    for paragraph in word_replacer.docx.paragraphs:
-        if "reference" in paragraph.text.lower() and is_real_reference(paragraph):
-            break
-        paragraphs.append(paragraph.text)
-    
+        # Extract all paragraphs from the document
+    paragraphs = [paragraph.text for paragraph in word_replacer.docx.paragraphs]
+    print(paragraphs[1])
     table_texts = []
     for table in word_replacer.docx.tables:
-        for row in table.rows:
-            row_text = [cell.text for cell in row.cells]
-            for text in row_text:
-                table_texts.append(text)
-
-    # Create a list of prompts
-    prompts_list = []
-    for paragraph in paragraphs:
-        prompt = f"Correct English in the following text keep it in one paragraph: {paragraph}\n"
-        for underlined_text in underlined_text_array:
-            if underlined_text in paragraph:
-                prompt += f"Don't change: {underlined_text}\n"
-        prompt += "Here is the corrected version: "
-        prompts_list.append(prompt)
-
-    prompts_list_table = []
-    filtered_table_texts = []
-
-    for table_text in table_texts:
-        ignore_this_prompt = any(underlined_text in table_text for underlined_text in underlined_text_array)
-
-        if not ignore_this_prompt:
-            table_prompt = f"Correct English in the following phrase keep it a phrase: {table_text}\nHere is the corrected version: "
-            prompts_list_table.append(table_prompt)
-            filtered_table_texts.append(table_text)
-
-    # Update the original table_texts list
-    table_texts = filtered_table_texts
-        
-    # prompts_list_table = [f"Correct English in the following phrase keep it a phrase: {table_text}\nHere is the corrected version: " for table_text in table_texts]
+            for row in table.rows:
+                row_text = [cell.text for cell in row.cells]
+                for text in row_text:
+                    table_texts.append(text)
     
+        # Create a list of prompts
+    prompts_list = [f"Correct English grammar in the following text keep curly brackets keep it in one paragraph: {paragraph}\nHere is the corrected version: " for paragraph in paragraphs]
+        # table still testing
+    prompts_list_table = [f"Correct only grammar in the following text if needed do not define or add information keep it in one paragraph: {table_text}.\nHere is the corrected version: " for table_text in table_texts]
+        
     all_prompts_list = prompts_list + prompts_list_table
-    
-    # Define API parameters
-    api_params = {'prompts': all_prompts_list}
-    
-    # Send a GET request to the API
-    response = requests.get(api_url, params=api_params)
-    
-    # Check the status code and response content
-    if response.status_code == 200:
-        corrected_paragraphs = response.json()
         
-        all_text = paragraphs + table_texts
-
-        # Replace original paragraphs with corrected paragraphs
-        for i, (original, corrected) in enumerate(zip(all_text, corrected_paragraphs), start=1):
-            word_replacer.replace_in_paragraph(original, corrected)
-            word_replacer.replace_in_table(original, corrected)
-            print(f"Paragraph {i}: Replaced successfully!")
+        # Define API parameters
+    api_params = {'prompts': all_prompts_list}
+        
+        # Send a GET request to the API
+    response = requests.get(api_url, params=api_params)
+        
+        # Check the status code and response content
+    if response.status_code == 200:
+            corrected_paragraphs = response.json()
             
-        # Save the document with replaced paragraphs
-        output_filepath = os.path.join(folder_path, "document_updated.docx")
-        word_replacer.save(output_filepath)
-        print(f"Saved updated document to: {output_filepath}\n")
+            all_text = paragraphs + table_texts
+
+            # Replace original paragraphs with corrected paragraphs
+            for i, (original, corrected) in enumerate(zip(all_text, corrected_paragraphs), start=1):
+                word_replacer.replace_in_paragraph(original, corrected)
+                print(f"Paragraph {i}: Replaced successfully!")
+                
+            # Save the document with replaced paragraphs
+            output_filepath = os.path.join(folder_path, "document_updated.docx")
+            #output_filepath = f"document_updated.docx"
+            word_replacer.save(output_filepath)
+            print(f"Saved updated document to: {output_filepath}\n")
     else:
-        print("Failed to retrieve corrections. Status code:", response.status_code)
+            print("Failed to retrieve corrections. Status code:", response.status_code)
+    
+
+    
 
     # Redirect back to the file list
     return redirect(url_for('list_files'))
 
 @app.route('/download', methods=['POST'])
 def download_file():
-    # folder_path = r'C:\Users\quank\Documents\rmit\engineering science\architndesign\word_file'  # Replace with the actual folder path
-    folder_path = r'word_file'
+    folder_path = r'word_file'  # Replace with the actual folder path
 
     # Get the filename from the request
     filename = request.form['filename']
@@ -138,4 +107,4 @@ def download_file():
     return send_file(file_path, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+ app.run(host='0.0.0.0')
